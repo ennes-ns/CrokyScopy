@@ -1,0 +1,12 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+C:/Users/ennes/Programming/CrokyScope/build/CrokyScope_artefacts/JuceLibraryCode/CrokyScope_resources.rc
+windows.h
+-
+
