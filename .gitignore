@@ -2,6 +2,7 @@
 build/
 install/
 Archive/
+.github/
 bin/
 obj/
 out/
