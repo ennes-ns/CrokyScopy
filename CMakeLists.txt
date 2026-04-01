@@ -28,7 +28,7 @@ juce_add_plugin(CrokyScopy
     PRODUCT_NAME "CrokyScopy"
 )
 
-# 3. Source Files (Modular)
+# 3. Source Files
 target_sources(CrokyScopy
     PRIVATE
     Source/DSP/PluginProcessor.cpp
@@ -38,16 +38,16 @@ target_sources(CrokyScopy
     Source/UI/ScopeComponent.cpp
     Source/UI/ScopeComponent.h
     Source/Core/ScopeBuffer.h
-    Source/Common.h
 )
 
 # 4. Compile Definitions & Options
+# Reverting to default rendering first to ensure 0 lag. Direct2D can be enabled
+# later if required, but standard rendering is most stable.
 target_compile_definitions(CrokyScopy
     PUBLIC
     JUCE_WEB_BROWSER=0
     JUCE_USE_CURL=0
     JUCE_VST3_CAN_REPLACE_VST2=0
-    JUCE_DIRECT2D=1
 )
 
 # 5. Link Libraries
@@ -67,3 +67,4 @@ target_link_libraries(CrokyScopy
 
 # 6. Generate JUCE Header
 juce_generate_juce_header(CrokyScopy)
+

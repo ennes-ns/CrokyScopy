@@ -3,10 +3,9 @@
 #include <JuceHeader.h>
 #include "../Core/ScopeBuffer.h"
 
-// Forward declaration of HUDWindow
 namespace CrokyScopy { class HUDWindow; }
 
-class CrokyScopyAudioProcessor : public juce::AudioProcessor
+class CrokyScopyAudioProcessor : public juce::AudioProcessor, private juce::Timer
 {
 public:
     CrokyScopyAudioProcessor();
@@ -20,7 +19,7 @@ public:
     juce::AudioProcessorEditor* createEditor() override;
     bool hasEditor() const override { return true; }
 
-    const juce::String getName() const override { return "CrokyScopy"; }
+    const juce::String getName() const override { return JucePlugin_Name; }
     bool acceptsMidi() const override { return false; }
     bool producesMidi() const override { return false; }
     bool isMidiEffect() const override { return false; }
@@ -35,18 +34,19 @@ public:
     void getStateInformation(juce::MemoryBlock& destData) override;
     void setStateInformation(const void* data, int sizeInBytes) override;
 
-    // --- Data Public Access ---
-    CrokyScopy::ScopeBuffer& getScopeBuffer() { return scopeBuffer; }
     juce::AudioProcessorValueTreeState apvts;
-
-    void toggleHUD(bool shouldBeOpen);
+    const CrokyScopy::ScopeBuffer& getScopeBuffer() const { return scopeBuffer; }
 
 private:
+    juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
+    
+    // The Safe GUI Timer
+    void timerCallback() override;
+
     CrokyScopy::ScopeBuffer scopeBuffer;
     std::unique_ptr<CrokyScopy::HUDWindow> hudWindow;
-    std::atomic<bool> isHudWindowInitializing { false };
-
-    juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
+    
+    float lastOpacity = -1.0f;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CrokyScopyAudioProcessor)
 };

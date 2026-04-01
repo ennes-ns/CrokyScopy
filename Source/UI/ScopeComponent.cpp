@@ -7,146 +7,86 @@ namespace CrokyScopy
 ScopeComponent::ScopeComponent(CrokyScopyAudioProcessor& p)
     : processor(p)
 {
-    setInterceptsMouseClicks(true, true);
-    setWantsKeyboardFocus(true);
+    // High-performance painting standard
+    setOpaque(false);
+    setBufferedToImage(true);
     
-    resizeConstrainer.setMinimumSize(30, 30);
-    resizeConstrainer.setMaximumSize(3840, 2160);
-
-    startTimerHz(60); // 60 FPS rendering
+    // Smooth 60FPS refresh via safe JUCE timer
+    startTimerHz(60); 
 }
 
 ScopeComponent::~ScopeComponent()
 {
-}
-
-void ScopeComponent::paint(juce::Graphics& g)
-{
-    // Draw Background/Grid
-    if (needsGridRepaint || gridCache.isNull()) 
-        renderGridToCache();
-    
-    g.drawImageAt(gridCache, 0, 0);
-
-    // Draw the Waveform
-    renderWaveform(g);
-
-    // Draw Edit Mode indicator if applicable
-    bool isEditMode = processor.apvts.getRawParameterValue("edit_mode")->load() > 0.5f;
-    if (isEditMode)
-    {
-        g.setColour(juce::Colours::white.withAlpha(0.2f));
-        g.drawRect(getLocalBounds(), 1);
-        g.setFont(12.0f);
-        g.drawText("EDIT MODE: Drag to move, Right-drag to resize", getLocalBounds().removeFromBottom(20).reduced(10, 0), juce::Justification::centredRight);
-    }
-}
-
-void ScopeComponent::resized()
-{
-    needsGridRepaint = true;
+    stopTimer();
 }
 
 void ScopeComponent::timerCallback()
 {
-    // Refresh parameters
-    currentHue = processor.apvts.getRawParameterValue("hue")->load();
-    currentLineWidth = processor.apvts.getRawParameterValue("line_width")->load();
-    currentVerticalZoom = processor.apvts.getRawParameterValue("vertical_zoom")->load();
-
     repaint();
 }
 
-void ScopeComponent::renderGridToCache()
+void ScopeComponent::paint(juce::Graphics& g)
 {
-    gridCache = juce::Image(juce::Image::ARGB, getWidth(), getHeight(), true);
-    juce::Graphics g(gridCache);
-
-    float opacity = processor.apvts.getRawParameterValue("opacity")->load();
-    g.fillAll(juce::Colours::black.withAlpha(opacity * 0.5f));
-
-    g.setColour(juce::Colours::white.withAlpha(0.05f));
-    for (int x = 0; x < getWidth(); x += 50) g.drawVerticalLine(x, 0, (float)getHeight());
-    for (int y = 0; y < getHeight(); y += 50) g.drawHorizontalLine(y, 0, (float)getWidth());
-
-    needsGridRepaint = false;
-}
-
-void ScopeComponent::renderWaveform(juce::Graphics& g)
-{
-    auto& buffer = processor.getScopeBuffer();
-    int currentIdx = buffer.getWriteIndex();
+    // Minimal draw logic
+    auto bounds = getLocalBounds().toFloat();
     
-    juce::Path wavePath;
-    float halfH = (float)getHeight() / 2.0f;
-    float w = (float)getWidth();
+    // Background (if needed, but usually handled by HUDWindow)
+    g.fillAll(juce::Colours::transparentBlack);
 
-    // Mapping: Bin Index -> X position
-    auto getX = [&](int binIdx) { return (float)binIdx / (float)CrokyScopy::ScopeBuffer::NumBins * w; };
+    const auto& buffer = processor.getScopeBuffer();
+    
+    float hue = processor.apvts.getRawParameterValue("hue")->load();
+    float lineWidth = processor.apvts.getRawParameterValue("line_width")->load();
+    
+    g.setColour(juce::Colour::fromHSV(hue, 1.0f, 1.0f, 1.0f));
 
-    bool firstPoint = true;
+    wavePath.clear();
+    
+    int numBins = ScopeBuffer::NumBins;
+    float widthRatio = bounds.getWidth() / (float)numBins;
+    float centerY = bounds.getHeight() / 2.0f;
+    
+    // Find the latest write index to ensure scrolling
+    int currentWriteIdx = buffer.getWriteIndex();
 
-    // We draw the path in two segments to handle the "paging" wrap-around cleanly.
-    // Segment 1: from start up to current writing point
-    // Segment 2: from current writing point to end
-    for (int i = 0; i < CrokyScopy::ScopeBuffer::NumBins; ++i)
+    bool started = false;
+    for (int i = 0; i < numBins; ++i)
     {
-        auto range = buffer.getBinRange(i);
-        float x = getX(i);
-        float yMin = halfH - (range.getEnd() * halfH * currentVerticalZoom);
-        float yMax = halfH - (range.getStart() * halfH * currentVerticalZoom);
+        // Read oldest to newest
+        int readIdx = (currentWriteIdx + i) % numBins;
+        float val = buffer.getBinValue(readIdx);
 
-        if (firstPoint)
-        {
-            wavePath.startNewSubPath(x, (yMin + yMax) / 2.0f);
-            firstPoint = false;
-        }
+        float x = i * widthRatio;
+        // Simple unipolar plotting for now to ensure visibility
+        float y = centerY - (val * centerY);
 
-        // Invisible Seam: break path at the write head to avoid horizontal connecting lines
-        if (i == currentIdx)
+        if (!started)
         {
-            wavePath.startNewSubPath(x, (yMin + yMax) / 2.0f);
+            wavePath.startNewSubPath(x, y);
+            started = true;
         }
         else
         {
-            wavePath.lineTo(x, yMin);
-            wavePath.lineTo(x, yMax);
+            wavePath.lineTo(x, y);
         }
     }
 
-    g.setColour(juce::Colour::fromHSV(currentHue, 0.8f, 1.0f, 1.0f));
-    g.strokePath(wavePath, juce::PathStrokeType(currentLineWidth, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+    g.strokePath(wavePath, juce::PathStrokeType(lineWidth));
+}
+
+void ScopeComponent::resized()
+{
+    // No allocation here yet, simple resize.
 }
 
 void ScopeComponent::mouseDown(const juce::MouseEvent& e)
 {
-    bool isEditMode = processor.apvts.getRawParameterValue("edit_mode")->load() > 0.5f;
-    if (!isEditMode) return;
-
-    if (e.mods.isLeftButtonDown())
-    {
-        dragger.startDraggingComponent(getParentComponent(), e);
-    }
+    dragger.startDraggingComponent(getTopLevelComponent(), e);
 }
 
 void ScopeComponent::mouseDrag(const juce::MouseEvent& e)
 {
-    bool isEditMode = processor.apvts.getRawParameterValue("edit_mode")->load() > 0.5f;
-    if (!isEditMode) return;
-
-    if (e.mods.isLeftButtonDown())
-    {
-        dragger.dragComponent(getParentComponent(), e, &resizeConstrainer);
-    }
-    else if (e.mods.isRightButtonDown())
-    {
-        // Resizing
-        auto* parent = getParentComponent();
-        if (parent != nullptr) {
-            auto pos = e.getEventRelativeTo(parent).getPosition();
-            parent->setSize(juce::jmax(100, pos.getX()), juce::jmax(50, pos.getY()));
-        }
-    }
+    dragger.dragComponent(getTopLevelComponent(), e, nullptr);
 }
 
 } // namespace CrokyScopy
