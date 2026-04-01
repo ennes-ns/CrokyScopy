@@ -1,4 +1,4 @@
-# CrokyScope TODO 📝
+# CrokyScopy TODO 📝
 
 Next steps for the Wave Candy Style Plugin:
 
@@ -15,3 +15,4 @@ Next steps for the Wave Candy Style Plugin:
 - [ ] **Resize Handles**: Add the mouse-over resize handles in the bottom-right corner of the HUD.
 - [ ] **Color Customization**: Bind the accent color parameter to the meter rendering.
 - [ ] **Persistence**: Ensure the HUD window position (X, Y) is correctly saved and restored from the APVTS.
+

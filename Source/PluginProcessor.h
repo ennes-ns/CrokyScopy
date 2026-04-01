@@ -2,12 +2,13 @@
 
 #include <JuceHeader.h>
 #include "HUDWindow.h"
+#include "ScopeBuffer.h"
 
-class CrokyScopeAudioProcessor : public juce::AudioProcessor
+class CrokyScopyAudioProcessor : public juce::AudioProcessor
 {
 public:
-    CrokyScopeAudioProcessor();
-    ~CrokyScopeAudioProcessor() override;
+    CrokyScopyAudioProcessor();
+    ~CrokyScopyAudioProcessor() override;
 
     void prepareToPlay(double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
@@ -17,7 +18,7 @@ public:
     juce::AudioProcessorEditor* createEditor() override;
     bool hasEditor() const override { return true; }
 
-    const juce::String getName() const override { return "CrokyScope"; }
+    const juce::String getName() const override { return "CrokyScopy"; }
     bool acceptsMidi() const override { return false; }
     bool producesMidi() const override { return false; }
     bool isMidiEffect() const override { return false; }
@@ -34,15 +35,16 @@ public:
 
     juce::AudioProcessorValueTreeState apvts;
     
-    // Meter value for the HUD
-    juce::Atomic<float> meterValue { 0.0f };
+    // The main real-time buffer for the scope visual
+    ScopeBuffer scopeBuffer;
 
     void toggleHUD(bool shouldBeOpen);
 
 private:
-    std::unique_ptr<HUDWindow> hudWindow;
+    std::unique_ptr<CrokyScopy::HUDWindow> hudWindow;
     
     juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CrokyScopeAudioProcessor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CrokyScopyAudioProcessor)
 };
+

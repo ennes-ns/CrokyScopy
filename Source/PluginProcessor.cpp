@@ -1,26 +1,27 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-CrokyScopeAudioProcessor::CrokyScopeAudioProcessor()
+CrokyScopyAudioProcessor::CrokyScopyAudioProcessor()
     : AudioProcessor(BusesProperties().withInput("Input", juce::AudioChannelSet::stereo(), true)
                                       .withOutput("Output", juce::AudioChannelSet::stereo(), true)),
       apvts(*this, nullptr, "Parameters", createParameterLayout())
 {
 }
 
-CrokyScopeAudioProcessor::~CrokyScopeAudioProcessor()
+CrokyScopyAudioProcessor::~CrokyScopyAudioProcessor()
 {
 }
 
-void CrokyScopeAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
+void CrokyScopyAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
+{
+    scopeBuffer.prepare(sampleRate);
+}
+
+void CrokyScopyAudioProcessor::releaseResources()
 {
 }
 
-void CrokyScopeAudioProcessor::releaseResources()
-{
-}
-
-bool CrokyScopeAudioProcessor::isBusesLayoutSupported(const BusesLayout& layouts) const
+bool CrokyScopyAudioProcessor::isBusesLayoutSupported(const BusesLayout& layouts) const
 {
     if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::mono()
      && layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
@@ -32,7 +33,7 @@ bool CrokyScopeAudioProcessor::isBusesLayoutSupported(const BusesLayout& layouts
     return true;
 }
 
-void CrokyScopeAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
+void CrokyScopyAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
     auto totalNumInputChannels  = getTotalNumInputChannels();
@@ -41,30 +42,39 @@ void CrokyScopeAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear(i, 0, buffer.getNumSamples());
 
-    // Simple Envelope Follower logic (to be refined)
-    float maxLevel = 0.0f;
-    for (int channel = 0; channel < totalNumInputChannels; ++channel)
+    // Retrieve beats per pass from APVTS (Index 0=4, 1=8, 2=16)
+    float beatIdx = apvts.getRawParameterValue("beats")->load();
+    double beatsPerPass = (beatIdx < 0.5f) ? 4.0 : ((beatIdx < 1.5f) ? 8.0 : 16.0);
+
+    // Sync with DAW Playhead
+    if (auto* playHead = getPlayHead())
     {
-        float level = buffer.getMagnitude(channel, 0, buffer.getNumSamples());
-        if (level > maxLevel) maxLevel = level;
+        if (auto posInfo = playHead->getPosition())
+        {
+            if (posInfo->getIsPlaying())
+            {
+                double ppq = posInfo->getPpqPosition().orFallback(0.0);
+                double bpm = posInfo->getBpm().orFallback(120.0);
+                
+                scopeBuffer.pushBlock(buffer, totalNumInputChannels, ppq, bpm, beatsPerPass);
+            }
+        }
     }
-    
-    meterValue.set(maxLevel);
 }
 
-juce::AudioProcessorEditor* CrokyScopeAudioProcessor::createEditor()
+juce::AudioProcessorEditor* CrokyScopyAudioProcessor::createEditor()
 {
-    return new CrokyScopeAudioProcessorEditor(*this);
+    return new CrokyScopyAudioProcessorEditor(*this);
 }
 
-void CrokyScopeAudioProcessor::getStateInformation(juce::MemoryBlock& destData)
+void CrokyScopyAudioProcessor::getStateInformation(juce::MemoryBlock& destData)
 {
     auto state = apvts.copyState();
     std::unique_ptr<juce::XmlElement> xml(state.createXml());
     copyXmlToBinary(*xml, destData);
 }
 
-void CrokyScopeAudioProcessor::setStateInformation(const void* data, int sizeInBytes)
+void CrokyScopyAudioProcessor::setStateInformation(const void* data, int sizeInBytes)
 {
     std::unique_ptr<juce::XmlElement> xmlState(getXmlFromBinary(data, sizeInBytes));
     if (xmlState.get() != nullptr)
@@ -72,13 +82,13 @@ void CrokyScopeAudioProcessor::setStateInformation(const void* data, int sizeInB
             apvts.replaceState(juce::ValueTree::fromXml(*xmlState));
 }
 
-void CrokyScopeAudioProcessor::toggleHUD(bool shouldBeOpen)
+void CrokyScopyAudioProcessor::toggleHUD(bool shouldBeOpen)
 {
     if (shouldBeOpen)
     {
         if (hudWindow == nullptr)
         {
-            hudWindow = std::make_unique<HUDWindow>("CrokyScope HUD", juce::Colours::transparentBlack, 0);
+            hudWindow = std::make_unique<HUDWindow>("CrokyScopy HUD", juce::Colours::transparentBlack, 0);
             hudWindow->setVisible(true);
         }
     }
@@ -88,18 +98,20 @@ void CrokyScopeAudioProcessor::toggleHUD(bool shouldBeOpen)
     }
 }
 
-juce::AudioProcessorValueTreeState::ParameterLayout CrokyScopeAudioProcessor::createParameterLayout()
+juce::AudioProcessorValueTreeState::ParameterLayout CrokyScopyAudioProcessor::createParameterLayout()
 {
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
     
-    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "opacity", 1 }, "Opacity", 0.0f, 1.0f, 0.8f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "scale", 1 }, "Scale", 0.5f, 2.0f, 1.0f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "smoothing", 1 }, "Smoothing", 0.0f, 1.0f, 0.5f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "opacity", 1 }, "HUD Opacity", 0.0f, 1.0f, 0.8f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "line_width", 1 }, "Line Width", 0.5f, 10.0f, 2.0f));
+    layout.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID { "beats", 1 }, "Beats per Pass", juce::StringArray{"4 Beats", "8 Beats", "16 Beats"}, 0));
+    layout.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID { "edit_mode", 1 }, "Edit Tool", false));
     
     return layout;
 }
 
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
-    return new CrokyScopeAudioProcessor();
+    return new CrokyScopyAudioProcessor();
 }
+

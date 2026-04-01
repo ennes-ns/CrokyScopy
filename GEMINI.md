@@ -28,3 +28,4 @@ HUDWindow Klasse (De "Wave Candy" Display):
 - Gebruik JUCE 8 standaarden.
 - Scheid de Win32-specifieke code met #if JUCE_WINDOWS.
 - Zorg dat het venster de laatst bekende positie (X, Y) opslaat in de AudioProcessorValueTreeState.
+

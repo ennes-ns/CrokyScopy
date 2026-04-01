@@ -1,11 +1,11 @@
-# CrokyScope Architecture & Logic
+# CrokyScopy Architecture & Logic
 
-This document explains the structure and internal workings of the CrokyScope VST3 plugin.
+This document explains the structure and internal workings of the CrokyScopy VST3 plugin.
 
 ## 📁 Project Structure
 
 ```text
-CrokyScope/
+CrokyScopy/
 ├── Source/
 │   ├── PluginProcessor.h/cpp  # Audio logic & HUD management
 │   ├── PluginEditor.h/cpp     # Main DAW UI (Parameters)
@@ -17,7 +17,7 @@ CrokyScope/
 
 ## 🏗️ Core Architecture: Split-Window Design
 
-Unlike traditional plugins where the UI is tied to the DAW's editor window, CrokyScope uses a **Split-Window Design**:
+Unlike traditional plugins where the UI is tied to the DAW's editor window, CrokyScopy uses a **Split-Window Design**:
 
 1.  **AudioProcessor**: Acts as the "Brain". It owns a `std::unique_ptr<HUDWindow>`. Because the Processor lives as long as the plugin is loaded, the HUD window can stay open even if you close the main plugin UI in your DAW.
 2.  **HUDWindow**: A custom `juce::DocumentWindow` that uses **Win32 Hacking** (`WS_EX_LAYERED`, `WS_EX_TOOLWINDOW`) to:
@@ -46,3 +46,4 @@ SetWindowLong(hwnd, GWL_EXSTYLE, exStyle);
 ## 🎛️ Parameters
 
 All settings (Opacity, Scale, Color) are managed via `juce::AudioProcessorValueTreeState` (APVTS). This ensures that your HUD settings are saved within your DAW project and can be automated.
+

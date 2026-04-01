@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(CrokyScope VERSION 0.0.1)
+project(CrokyScopy VERSION 0.0.1)
 
 set(JUCE_PLUGINS_NAMES_AND_IDS
-    "CrokyScope" "Cs01"
+    "CrokyScopy" "Cs01"
 )
 
 # Optional: Add JUCE as a subdirectory or find it
@@ -18,19 +18,19 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(juce)
 
-juce_add_plugin(CrokyScope
+juce_add_plugin(CrokyScopy
     COMPANY_NAME "Ennes"
     IS_SYNTH FALSE
     NEEDS_MIDI_INPUT FALSE
     NEEDS_MIDI_OUTPUT FALSE
     IS_MIDI_EFFECT FALSE
     EDITOR_WANTS_KEYBOARD_FOCUS TRUE
-    COPY_STEP_LABEL "Copying CrokyScope to VST3 folder"
+    COPY_STEP_LABEL "Copying CrokyScopy to VST3 folder"
     FORMATS VST3
-    PRODUCT_NAME "CrokyScope"
+    PRODUCT_NAME "CrokyScopy"
 )
 
-target_sources(CrokyScope
+target_sources(CrokyScopy
     PRIVATE
     Source/PluginProcessor.cpp
     Source/PluginProcessor.h
@@ -38,16 +38,20 @@ target_sources(CrokyScope
     Source/PluginEditor.h
     Source/HUDWindow.cpp
     Source/HUDWindow.h
+    Source/ScopeComponent.cpp
+    Source/ScopeComponent.h
+    Source/ScopeBuffer.h
+    Source/Common.h
 )
 
-target_compile_definitions(CrokyScope
+target_compile_definitions(CrokyScopy
     PUBLIC
     JUCE_WEB_BROWSER=0
     JUCE_USE_CURL=0
     JUCE_VST3_CAN_REPLACE_VST2=0
 )
 
-target_link_libraries(CrokyScope
+target_link_libraries(CrokyScopy
     PRIVATE
     juce::juce_audio_utils
     juce::juce_audio_processors
@@ -61,4 +65,5 @@ target_link_libraries(CrokyScope
     juce::juce_audio_devices
 )
 
-juce_generate_juce_header(CrokyScope)
+juce_generate_juce_header(CrokyScopy)
+
