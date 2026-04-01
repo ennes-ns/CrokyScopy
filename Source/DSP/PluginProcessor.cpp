@@ -35,6 +35,15 @@ bool CrokyScopyAudioProcessor::isBusesLayoutSupported(const BusesLayout& layouts
 
 void CrokyScopyAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
+    // --- HUD Visibility Persistence (Lazy Init) ---
+    // Moved to TOP to ensure it opens regardless of playback state
+    bool showHud = apvts.getRawParameterValue("show_hud")->load() > 0.5f;
+    if (showHud && hudWindow == nullptr && !isHudWindowInitializing.load())
+    {
+        isHudWindowInitializing.store(true);
+        juce::MessageManager::callAsync([this]() { toggleHUD(true); });
+    }
+
     juce::ScopedNoDenormals noDenormals;
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
@@ -71,14 +80,6 @@ void CrokyScopyAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
     // --- Data Capture ---
     if (totalNumInputChannels > 0)
         scopeBuffer.pushBlock(buffer, totalNumInputChannels, ppq, bpm, beatsPerPass);
-
-    // --- HUD Visibility Persistence (Lazy Init) ---
-    bool showHud = apvts.getRawParameterValue("show_hud")->load() > 0.5f;
-    if (showHud && hudWindow == nullptr && !isHudWindowInitializing.load())
-    {
-        isHudWindowInitializing.store(true);
-        juce::MessageManager::callAsync([this]() { toggleHUD(true); });
-    }
 }
 
 juce::AudioProcessorEditor* CrokyScopyAudioProcessor::createEditor()

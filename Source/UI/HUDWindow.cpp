@@ -37,6 +37,9 @@ HUDWindow::HUDWindow(CrokyScopyAudioProcessor& p)
     setContentOwned(scopeComponent.get(), true);
     setBackgroundColour(juce::Colours::transparentBlack);
     
+    // CRITICAL: Ensure top-level visibility in a plugin host
+    addToDesktop(0);
+    
     startTimerHz(30); // 30Hz for parameter syncing
 }
 
@@ -72,26 +75,29 @@ void HUDWindow::moved()
 void HUDWindow::timerCallback()
 {
     updateAppearance();
-    
-    // Safety check for Win32 attributes (sometimes handle changes)
-    if (firstRunSizeForce && getWindowHandle() != nullptr)
-    {
-        setWindowAttributes();
-        firstRunSizeForce = false;
-    }
 }
 
 void HUDWindow::updateAppearance()
 {
-    float newOpacity = processor.apvts.getRawParameterValue("opacity")->load();
-    bool newEditMode = processor.apvts.getRawParameterValue("edit_mode")->load() > 0.5f;
+    // --- State Fetching ---
+    auto opacityParam = processor.apvts.getRawParameterValue("opacity");
+    auto editModeParam = processor.apvts.getRawParameterValue("edit_mode");
+    
+    if (opacityParam == nullptr || editModeParam == nullptr) return;
 
-    if (newOpacity != currentOpacity || newEditMode != currentlyInEditMode || !attributesApplied)
+    float currentOpacity = opacityParam->load();
+    bool currentEditMode = editModeParam->load() > 0.5f;
+
+    // --- Change-Only Logic (Eliminates PC Lag) ---
+    // We only call expensive Win32/JUCE state functions if the parameters actually change.
+    if (firstRun || currentOpacity != lastOpacity || currentEditMode != lastEditMode)
     {
-        currentOpacity = newOpacity;
-        currentlyInEditMode = newEditMode;
         setAlpha(currentOpacity);
-        setWindowAttributes();
+        setWindowAttributes(); // Only called on change!
+        
+        lastOpacity = currentOpacity;
+        lastEditMode = currentEditMode;
+        firstRun = false;
     }
 }
 
@@ -101,29 +107,27 @@ void HUDWindow::setWindowAttributes()
     HWND hwnd = (HWND)getWindowHandle();
     if (hwnd != nullptr)
     {
-        // 1. Basic Style (Minimize box/Menu)
-        LONG style = GetWindowLong(hwnd, GWL_STYLE);
-        style |= WS_MINIMIZEBOX | WS_SYSMENU;
-        SetWindowLong(hwnd, GWL_STYLE, style);
-
-        // 2. Extended Style (Layered, Toolwindow)
+        // 1. Extended Style (Layered, Toolwindow)
         LONG exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+        
+        // Ensure Layered and Toolwindow are always set
         exStyle |= WS_EX_TOOLWINDOW | WS_EX_LAYERED;
 
-        // Toggle Click-through if not in Edit Mode
-        if (!currentlyInEditMode)
+        // Toggle Click-through based on cached lastEditMode
+        if (!lastEditMode)
             exStyle |= WS_EX_TRANSPARENT;
         else
             exStyle &= ~WS_EX_TRANSPARENT;
 
         SetWindowLong(hwnd, GWL_EXSTYLE, exStyle);
         
-        // 3. Final Attributes
-        SetLayeredWindowAttributes(hwnd, 0, 255, 0x00000002); // LWA_ALPHA
-        SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, 
-                     SWP_NOMOVE | SWP_NOSIZE | SWP_FRAMECHANGED | SWP_NOACTIVATE);
+        // 2. Final Attributes (Zero Hammering)
+        // LWA_ALPHA logic
+        SetLayeredWindowAttributes(hwnd, 0, 255, 0x00000002);
         
-        attributesApplied = true;
+        // Force topmost without triggering expensive frame changes repeatedly
+        SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, 
+                     SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
     }
 #endif
 }

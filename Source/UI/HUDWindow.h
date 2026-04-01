@@ -30,11 +30,10 @@ private:
     CrokyScopyAudioProcessor& processor;
     std::unique_ptr<ScopeComponent> scopeComponent;
     
-    // Performance Cache
-    bool currentlyInEditMode { false };
-    float currentOpacity { 1.0f };
-    bool attributesApplied { false };
-    bool firstRunSizeForce { true };
+    // Performance State Caching (Fixes PC Lag)
+    bool lastEditMode { false };
+    float lastOpacity { -1.0f };
+    bool firstRun { true };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(HUDWindow)
 };
