@@ -44,6 +44,7 @@ public:
 private:
     CrokyScopy::ScopeBuffer scopeBuffer;
     std::unique_ptr<CrokyScopy::HUDWindow> hudWindow;
+    std::atomic<bool> isHudWindowInitializing { false };
 
     juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
 

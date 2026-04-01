@@ -1,0 +1,17 @@
+# Antigravity Work Log: CrokyScopy (Atomic Vision)
+
+## Vondsten (Discoveries)
+- **Message Loop Bomb**: `processBlock` (audio thread) must NEVER queue UI tasks (`callAsync`) without a strict atomic synchronization flag. Fast-running blocks will saturate the Message Manager and lag the host/PC.
+  - **Oplossing**: Gebruik `std::atomic<bool> isHudWindowInitializing` om éénmalige activatie te garanderen.
+- **Win32 Layered Transparency**: De `WS_EX_LAYERED` en `WS_EX_TRANSPARENT` attributen moeten consistent worden toegepast via `SetWindowLong` voor click-through functionaliteit.
+- **JUCE 8 Direct2D**: Direct2D is nu de standaard op Windows. Expliciete activatie via CMake zorgt voor maximale performance bij het tekenen van complexe waveforms (4K+ bins).
+
+## Werkwijze (Workflow)
+1. **Generic Plugin Editor**: Gebruik geen custom `PluginEditor`. Vertrouw op de DAW voor parameter-besturing. Alleen de HUD is custom.
+2. **Atomic Binned Buffer**: Audio wordt gepusht naar een array van atomics (`ScopeBuffer`) met min/max tracking per bin. Dit voorkomt locks en garandeert pixel-perfecte peaks ongeacht de zoom.
+3. **Modulariteit**: Hou Core (Buffer), DSP (Processor) en UI (HUD) strikt gescheiden.
+4. **QA/Unit Testing**: Altijd de `ScopeBuffer`-logica verifiëren via `juce::UnitTest` voor complexe transport-mapping.
+
+## Todo's (Lange termijn)
+- [ ] Implementeer 'Free' mode (zonder transport sync).
+- [ ] Kleur-verloop op basis van amplitude.

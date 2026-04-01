@@ -74,8 +74,9 @@ void CrokyScopyAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 
     // --- HUD Visibility Persistence (Lazy Init) ---
     bool showHud = apvts.getRawParameterValue("show_hud")->load() > 0.5f;
-    if (showHud && hudWindow == nullptr)
+    if (showHud && hudWindow == nullptr && !isHudWindowInitializing.load())
     {
+        isHudWindowInitializing.store(true);
         juce::MessageManager::callAsync([this]() { toggleHUD(true); });
     }
 }
@@ -100,6 +101,8 @@ void CrokyScopyAudioProcessor::toggleHUD(bool show)
     {
         hudWindow.reset();
     }
+    
+    isHudWindowInitializing.store(false);
 }
 
 juce::AudioProcessorValueTreeState::ParameterLayout CrokyScopyAudioProcessor::createParameterLayout()

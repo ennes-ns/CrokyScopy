@@ -1,12 +1,39 @@
+# Build Directories
 build/
-.vs/
+bin/
+obj/
 out/
+x64/
+Debug/
+Release/
+
+# JUCE/CMake specific
 JUCE/
-*_VST3
-*_Standalone
+_deps/
+* artefacts/
+*.vst3/
+*.component/
+*.app/
+
+# IDE files
+.vs/
+.vscode/
+.idea/
 *.user
 *.suo
+*.sln
+*.vcxproj
+*.filters
+
+# Binary/Temporary
 *.pdb
 *.obj
 *.bin
 *.log
+*.bak
+*.swp
+*~
+
+# System
+.DS_Store
+Thumbs.db
