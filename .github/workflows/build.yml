@@ -1,0 +1,57 @@
+name: CMake Build (Windows)
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  release:
+    types: [created]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Configure CMake
+      # Build for Visual Studio 2022
+      run: cmake -B ${{github.workspace}}/build -G "Visual Studio 17 2022" -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+
+    - name: Build
+      # Build the project
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+
+    - name: Upload VST3 Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: CrokyScopy-VST3-Windows
+        path: ${{github.workspace}}/build/CrokyScopy_artefacts/Release/VST3/CrokyScopy.vst3
+
+  release:
+    needs: build
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download VST3 Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: CrokyScopy-VST3-Windows
+          path: ./release-assets
+      
+      - name: Zip Release
+        run: |
+          cd release-assets
+          zip -r CrokyScopy_Windows.zip CrokyScopy.vst3
+
+      - name: Upload Release Asset
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-assets/CrokyScopy_Windows.zip
