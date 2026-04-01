@@ -41,6 +41,7 @@ target_sources(CrokyScopy
     Source/ScopeComponent.cpp
     Source/ScopeComponent.h
     Source/ScopeBuffer.h
+    Source/ScopeBufferTest.cpp
     Source/Common.h
 )
 
