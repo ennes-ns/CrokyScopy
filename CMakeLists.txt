@@ -1,70 +1,50 @@
 cmake_minimum_required(VERSION 3.22)
+project(CrokyScope VERSION 1.0.0)
 
-project(CrokyScopy VERSION 0.1.0)
-
-# 0. Global Project Configuration
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-# 1. Fetch JUCE 8
+# Fetch JUCE automatically from github (latest 8.x)
 include(FetchContent)
 FetchContent_Declare(
     juce
     GIT_REPOSITORY https://github.com/juce-framework/JUCE.git
-    GIT_TAG        8.0.0
+    GIT_TAG        8.0.1
 )
 FetchContent_MakeAvailable(juce)
 
-# 2. Add the Plugin Target
-juce_add_plugin(CrokyScopy
+# Setup VST3 project
+juce_add_plugin(CrokyScope
     COMPANY_NAME "Ennes"
     IS_SYNTH FALSE
     NEEDS_MIDI_INPUT FALSE
     NEEDS_MIDI_OUTPUT FALSE
     IS_MIDI_EFFECT FALSE
     EDITOR_WANTS_KEYBOARD_FOCUS TRUE
-    COPY_STEP_LABEL "Copying CrokyScopy to VST3 folder"
-    FORMATS VST3
-    PRODUCT_NAME "CrokyScopy"
+    COPY_PLUGIN_AFTER_BUILD FALSE
+    PLUGIN_MANUFACTURER_CODE Crky
+    PLUGIN_CODE Scpe
+    FORMATS VST3 Standalone
+    PRODUCT_NAME "CrokyScope"
 )
 
-# 3. Source Files
-target_sources(CrokyScopy
+target_sources(CrokyScope
     PRIVATE
-    Source/DSP/PluginProcessor.cpp
-    Source/DSP/PluginProcessor.h
-    Source/UI/HUDWindow.cpp
-    Source/UI/HUDWindow.h
-    Source/UI/ScopeComponent.cpp
-    Source/UI/ScopeComponent.h
-    Source/Core/ScopeBuffer.h
+        src/PluginProcessor.cpp
+        src/PluginProcessor.h
+        src/PluginEditor.cpp
+        src/PluginEditor.h
+        src/ScopeHUDWindow.cpp
+        src/ScopeHUDWindow.h
 )
 
-# 4. Compile Definitions & Options
-# Reverting to default rendering first to ensure 0 lag. Direct2D can be enabled
-# later if required, but standard rendering is most stable.
-target_compile_definitions(CrokyScopy
+target_compile_definitions(CrokyScope
     PUBLIC
-    JUCE_WEB_BROWSER=0
-    JUCE_USE_CURL=0
-    JUCE_VST3_CAN_REPLACE_VST2=0
+        JUCE_VST3_CAN_REPLACE_VST2=0
 )
 
-# 5. Link Libraries
-target_link_libraries(CrokyScopy
+target_link_libraries(CrokyScope
     PRIVATE
-    juce::juce_audio_utils
-    juce::juce_audio_processors
-    juce::juce_gui_extra
-    juce::juce_gui_basics
-    juce::juce_graphics
-    juce::juce_events
-    juce::juce_core
-    juce::juce_audio_basics
-    juce::juce_audio_formats
-    juce::juce_audio_devices
+        juce::juce_audio_utils
+    PUBLIC
+        juce::juce_recommended_config_flags
+        juce::juce_recommended_lto_flags
+        juce::juce_recommended_warning_flags
 )
-
-# 6. Generate JUCE Header
-juce_generate_juce_header(CrokyScopy)
-

@@ -1,0 +1,46 @@
+MSBuild version 18.4.0+6e61e96ac for .NET Framework
+
+  Checking File Globs
+  CrokyScope_rc_lib.vcxproj -> C:\Users\ennes\Programming\CrokyScope\build\CrokyScope_rc_lib.dir\Release\CrokyScope_rc_lib.lib
+  CrokyScope.vcxproj -> C:\Users\ennes\Programming\CrokyScope\build\CrokyScope_artefacts\Release\CrokyScope_SharedCode.lib
+  juce_vst3_helper.vcxproj -> C:\Users\ennes\Programming\CrokyScope\build\Release\juce_vst3_helper.exe
+  CrokyScope_VST3.vcxproj -> C:\Users\ennes\Programming\CrokyScope\build\CrokyScope_artefacts\Release\VST3\CrokyScope.vst3\Contents\x86_64-win\CrokyScope.vst3
+  removing moduleinfo.json
+  -- Installing: C:\Program Files\Common Files/VST3/CrokyScope.vst3
+  CMake Error at _deps/juce-src/extras/Build/CMake/copyDir.cmake:45 (file):
+    file INSTALL cannot make directory "C:\Program Files\Common
+    Files/VST3/CrokyScope.vst3": Permission denied.
+  
+  
+C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Microsoft\VC\v180\Microsoft.CppCommon.targets(166,5): error MSB3073: The command "setlocal [C:\Users\ennes\Programming\CrokyScope\build\CrokyScope_VST3.vcxproj]
+C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Microsoft\VC\v180\Microsoft.CppCommon.targets(166,5): error MSB3073: "C:\Program Files\CMake\bin\cmake.exe" -E echo "removing moduleinfo.json" [C:\Users\ennes\Programming\CrokyScope\build\CrokyScope_VST3.vcxproj]
+C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Microsoft\VC\v180\Microsoft.CppCommon.targets(166,5): error MSB3073: if %errorlevel% neq 0 goto :cmEnd [C:\Users\ennes\Programming\CrokyScope\build\CrokyScope_VST3.vcxproj]
+C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Microsoft\VC\v180\Microsoft.CppCommon.targets(166,5): error MSB3073: "C:\Program Files\CMake\bin\cmake.exe" -E remove -f C:/Users/ennes/Programming/CrokyScope/build/CrokyScope_artefacts/Release/VST3/CrokyScope.vst3/Contents/moduleinfo.json C:/Users/ennes/Programming/CrokyScope/build/CrokyScope_artefacts/Release/VST3/CrokyScope.vst3/Contents/Resources/moduleinfo.json [C:\Users\ennes\Programming\CrokyScope\build\CrokyScope_VST3.vcxproj]
+C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Microsoft\VC\v180\Microsoft.CppCommon.targets(166,5): error MSB3073: if %errorlevel% neq 0 goto :cmEnd [C:\Users\ennes\Programming\CrokyScope\build\CrokyScope_VST3.vcxproj]
+C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Microsoft\VC\v180\Microsoft.CppCommon.targets(166,5): error MSB3073: :cmEnd [C:\Users\ennes\Programming\CrokyScope\build\CrokyScope_VST3.vcxproj]
+C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Microsoft\VC\v180\Microsoft.CppCommon.targets(166,5): error MSB3073: endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone [C:\Users\ennes\Programming\CrokyScope\build\CrokyScope_VST3.vcxproj]
+C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Microsoft\VC\v180\Microsoft.CppCommon.targets(166,5): error MSB3073: :cmErrorLevel [C:\Users\ennes\Programming\CrokyScope\build\CrokyScope_VST3.vcxproj]
+C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Microsoft\VC\v180\Microsoft.CppCommon.targets(166,5): error MSB3073: exit /b %1 [C:\Users\ennes\Programming\CrokyScope\build\CrokyScope_VST3.vcxproj]
+C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Microsoft\VC\v180\Microsoft.CppCommon.targets(166,5): error MSB3073: :cmDone [C:\Users\ennes\Programming\CrokyScope\build\CrokyScope_VST3.vcxproj]
+C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Microsoft\VC\v180\Microsoft.CppCommon.targets(166,5): error MSB3073: if %errorlevel% neq 0 goto :VCEnd [C:\Users\ennes\Programming\CrokyScope\build\CrokyScope_VST3.vcxproj]
+C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Microsoft\VC\v180\Microsoft.CppCommon.targets(166,5): error MSB3073: setlocal [C:\Users\ennes\Programming\CrokyScope\build\CrokyScope_VST3.vcxproj]
+C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Microsoft\VC\v180\Microsoft.CppCommon.targets(166,5): error MSB3073: "C:\Program Files\CMake\bin\cmake.exe" -E make_directory C:/Users/ennes/Programming/CrokyScope/build/CrokyScope_artefacts/Release/VST3/CrokyScope.vst3/Contents/Resources [C:\Users\ennes\Programming\CrokyScope\build\CrokyScope_VST3.vcxproj]
+C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Microsoft\VC\v180\Microsoft.CppCommon.targets(166,5): error MSB3073: if %errorlevel% neq 0 goto :cmEnd [C:\Users\ennes\Programming\CrokyScope\build\CrokyScope_VST3.vcxproj]
+C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Microsoft\VC\v180\Microsoft.CppCommon.targets(166,5): error MSB3073: Release\juce_vst3_helper.exe -create -version 1.0.0 -path C:/Users/ennes/Programming/CrokyScope/build/CrokyScope_artefacts/Release/VST3/CrokyScope.vst3 -output C:/Users/ennes/Programming/CrokyScope/build/CrokyScope_artefacts/Release/VST3/CrokyScope.vst3/Contents/Resources/moduleinfo.json [C:\Users\ennes\Programming\CrokyScope\build\CrokyScope_VST3.vcxproj]
+C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Microsoft\VC\v180\Microsoft.CppCommon.targets(166,5): error MSB3073: if %errorlevel% neq 0 goto :cmEnd [C:\Users\ennes\Programming\CrokyScope\build\CrokyScope_VST3.vcxproj]
+C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Microsoft\VC\v180\Microsoft.CppCommon.targets(166,5): error MSB3073: :cmEnd [C:\Users\ennes\Programming\CrokyScope\build\CrokyScope_VST3.vcxproj]
+C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Microsoft\VC\v180\Microsoft.CppCommon.targets(166,5): error MSB3073: endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone [C:\Users\ennes\Programming\CrokyScope\build\CrokyScope_VST3.vcxproj]
+C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Microsoft\VC\v180\Microsoft.CppCommon.targets(166,5): error MSB3073: :cmErrorLevel [C:\Users\ennes\Programming\CrokyScope\build\CrokyScope_VST3.vcxproj]
+C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Microsoft\VC\v180\Microsoft.CppCommon.targets(166,5): error MSB3073: exit /b %1 [C:\Users\ennes\Programming\CrokyScope\build\CrokyScope_VST3.vcxproj]
+C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Microsoft\VC\v180\Microsoft.CppCommon.targets(166,5): error MSB3073: :cmDone [C:\Users\ennes\Programming\CrokyScope\build\CrokyScope_VST3.vcxproj]
+C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Microsoft\VC\v180\Microsoft.CppCommon.targets(166,5): error MSB3073: if %errorlevel% neq 0 goto :VCEnd [C:\Users\ennes\Programming\CrokyScope\build\CrokyScope_VST3.vcxproj]
+C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Microsoft\VC\v180\Microsoft.CppCommon.targets(166,5): error MSB3073: setlocal [C:\Users\ennes\Programming\CrokyScope\build\CrokyScope_VST3.vcxproj]
+C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Microsoft\VC\v180\Microsoft.CppCommon.targets(166,5): error MSB3073: "C:\Program Files\CMake\bin\cmake.exe" -Dsrc=C:/Users/ennes/Programming/CrokyScope/build/CrokyScope_artefacts/Release/VST3/CrokyScope.vst3 "-Ddest=C:\Program Files\Common Files/VST3" -P C:/Users/ennes/Programming/CrokyScope/build/_deps/juce-src/extras/Build/CMake/copyDir.cmake [C:\Users\ennes\Programming\CrokyScope\build\CrokyScope_VST3.vcxproj]
+C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Microsoft\VC\v180\Microsoft.CppCommon.targets(166,5): error MSB3073: if %errorlevel% neq 0 goto :cmEnd [C:\Users\ennes\Programming\CrokyScope\build\CrokyScope_VST3.vcxproj]
+C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Microsoft\VC\v180\Microsoft.CppCommon.targets(166,5): error MSB3073: :cmEnd [C:\Users\ennes\Programming\CrokyScope\build\CrokyScope_VST3.vcxproj]
+C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Microsoft\VC\v180\Microsoft.CppCommon.targets(166,5): error MSB3073: endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone [C:\Users\ennes\Programming\CrokyScope\build\CrokyScope_VST3.vcxproj]
+C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Microsoft\VC\v180\Microsoft.CppCommon.targets(166,5): error MSB3073: :cmErrorLevel [C:\Users\ennes\Programming\CrokyScope\build\CrokyScope_VST3.vcxproj]
+C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Microsoft\VC\v180\Microsoft.CppCommon.targets(166,5): error MSB3073: exit /b %1 [C:\Users\ennes\Programming\CrokyScope\build\CrokyScope_VST3.vcxproj]
+C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Microsoft\VC\v180\Microsoft.CppCommon.targets(166,5): error MSB3073: :cmDone [C:\Users\ennes\Programming\CrokyScope\build\CrokyScope_VST3.vcxproj]
+C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Microsoft\VC\v180\Microsoft.CppCommon.targets(166,5): error MSB3073: if %errorlevel% neq 0 goto :VCEnd [C:\Users\ennes\Programming\CrokyScope\build\CrokyScope_VST3.vcxproj]
+C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Microsoft\VC\v180\Microsoft.CppCommon.targets(166,5): error MSB3073: :VCEnd" exited with code 1. [C:\Users\ennes\Programming\CrokyScope\build\CrokyScope_VST3.vcxproj]
