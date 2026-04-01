@@ -1,9 +1,7 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "Common.h"
 
-// Forward declaration
 class CrokyScopyAudioProcessor;
 
 namespace CrokyScopy
@@ -11,10 +9,7 @@ namespace CrokyScopy
 
 /**
  * @class ScopeComponent
- * @brief The main graphical component for the cycling Oscillogram.
- * 
- * Runs on a juce::Timer to redraw the ScopeBuffer state independently
- * of the main DAW UI. Uses offscreen caching for static grids.
+ * @brief The actual painting surface for the oscilloscope.
  */
 class ScopeComponent : public juce::Component, public juce::Timer
 {
@@ -26,29 +21,31 @@ public:
     void resized() override;
     void timerCallback() override;
 
+    // --- Mouse Handlers for Move/Resize ---
+    void mouseDown(const juce::MouseEvent& e) override;
+    void mouseDrag(const juce::MouseEvent& e) override;
+
 private:
     void renderGridToCache();
     void renderWaveform(juce::Graphics& g);
-    void updateVisualsFromAPVTS();
-    
+
     CrokyScopyAudioProcessor& processor;
 
+    // Rendering Cache
     juce::Image gridCache;
-    Palette currentPalette;
-    VisualSettings currentSettings;
+    bool needsGridRepaint { true };
 
-    float currentBeats { 4.0f };
-    bool inEditMode { false };
+    // Performance State
+    int lastWriteIndex { 0 };
+    float currentHue { 0.5f };
+    float currentLineWidth { 2.0f };
+    float currentVerticalZoom { 1.0f };
 
-    // Edit Mode Sub-components
+    // Interaction State
+    juce::ComponentBoundsConstrainer resizeConstrainer;
     juce::ComponentDragger dragger;
-    std::unique_ptr<juce::ResizableCornerComponent> resizer;
-
-    void mouseDown(const juce::MouseEvent& e) override;
-    void mouseDrag(const juce::MouseEvent& e) override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ScopeComponent)
 };
 
 } // namespace CrokyScopy
-

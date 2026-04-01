@@ -1,0 +1,35 @@
+# CrokyScopy Project Rules
+
+## Core Technologies
+- **JUCE 8**: C++ framework for audio processing and GUI.
+- **CMake**: Build system.
+- **Target**: VST3 Plugin (Release / x64).
+
+## Project Structure
+- `Source/`: All C++ source files.
+- `ScopeBuffer.h`: High-performance, lock-free oscilloscope buffer.
+- `HUDWindow.h/cpp`: Win32-specific "HUD" overlay logic (Topmost, Layered, Click-through).
+- `ScopeComponent.h/cpp`: Waveform rendering and mouse interaction.
+
+## HUD Interaction Rules
+- **Move**: Left-click & drag anywhere on the HUD (in Edit Mode).
+- **Resize**: Right-click & drag anywhere on the HUD (in Edit Mode).
+-lity**: Toggle `WS_EX_TRANSPARENT` in `HUDWindow::setWindowAttributes` to switch between "Interactive" and "Click-through".
+ **Control**: All interactions MUST be through the whole-window mouse handlers in `ScopeComponent`, NOT the parent `HUDWindow`.
+- **Visibi
+## Sync Logic
+- **Beat-Sync**: Uses DAW PPQ. 2/4/8/16 beat cycles.
+- **Free-Run**: Uses `std::fmod` on a time-based counter (10ms - 5s).
+- **Transport Sync**: If enabled, only updates when `getPlayHead()->getPosition()->getIsPlaying()` is true.
+
+## Visual Standards
+- **Color**: Waveform color mapped from the `hue` parameter (HSV).
+- **Opacity**: `opacity` parameter ONLY affects the background/grid, never the line itself.
+- **Accuracy**: Always render from the midpoint of the `ScopeBuffer` bins to avoid visual DC offsets.
+- **Seams**: Maintain "Invisible Seams" in Paging mode by only starting a new sub-path at the write-index.
+
+## Communication Rules
+- **Conciseness**: Keep all responses as short and direct as possible.
+- **No Token Bloat**: Do not provide overly long explanations or repetitive summaries.
+- **Direct Answer**: Just answer the question directly, without unnecessary preamble.
+- **Action over words**: Perform tasks and report only essential information or errors.

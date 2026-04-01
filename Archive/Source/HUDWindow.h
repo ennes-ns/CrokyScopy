@@ -22,6 +22,8 @@ public:
     ~HUDWindow() override;
 
     void closeButtonPressed() override;
+    void resized() override;
+    void moved() override;
     void timerCallback() override;
 
 private:
@@ -33,6 +35,14 @@ private:
     
     bool currentlyInEditMode { false };
     float currentOpacity { 1.0f };
+
+    int lastSyncMode { -1 };
+    int lastDrawMode { -1 };
+    int newSyncMode { 0 };
+    int newDrawMode { 0 };
+    bool nativeStyleChanged { true };
+    bool attributesApplied { false };
+    bool firstRunSizeForce { true };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(HUDWindow)
 };

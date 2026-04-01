@@ -4,7 +4,11 @@
 CrokyScopyAudioProcessorEditor::CrokyScopyAudioProcessorEditor(CrokyScopyAudioProcessor& p)
     : AudioProcessorEditor(&p), audioProcessor(p)
 {
+<<<<<<< Updated upstream
     setSize(400, 300);
+=======
+    setSize(450, 750);
+>>>>>>> Stashed changes
 
     // 1. HUD Toggle
     addAndMakeVisible(hudToggleButton);
@@ -59,8 +63,27 @@ void CrokyScopyAudioProcessorEditor::resized()
     hudToggleButton.setBounds(10, y, width + indent, rowHeight);
     y += rowHeight + 10;
 
+<<<<<<< Updated upstream
     editModeToggle.setBounds(10, y, width + indent, rowHeight);
     y += rowHeight + 10;
+=======
+    area.removeFromTop(30); // Visuals gap
+    
+    // VISUALS
+    auto visArea = area.removeFromTop(250);
+    
+    opacityLabel.setBounds(visArea.removeFromTop(20));
+    opacitySlider.setBounds(visArea.removeFromTop(30));
+    
+    hueLabel.setBounds(visArea.removeFromTop(20));
+    hueSlider.setBounds(visArea.removeFromTop(30));
+    
+    verticalZoomLabel.setBounds(visArea.removeFromTop(20));
+    verticalZoomSlider.setBounds(visArea.removeFromTop(30));
+    
+    lineWidthLabel.setBounds(visArea.removeFromTop(20));
+    lineWidthSlider.setBounds(visArea.removeFromTop(30));
+>>>>>>> Stashed changes
 
     opacitySlider.setBounds(indent, y, width, rowHeight);
     y += rowHeight + 10;

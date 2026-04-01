@@ -1,51 +1,12 @@
-# CMake build directories
 build/
-out/
-bin/
-lib/
-CMakeCache.txt
-CMakeFiles/
-CMakeScripts/
-Testing/
-Makefile
-cmake_install.cmake
-install_manifest.txt
-compile_commands.json
-
-# Visual Studio / Windows specific
 .vs/
-*.sln
-*.suo
+out/
+JUCE/
+*_VST3
+*_Standalone
 *.user
-*.db
+*.suo
 *.pdb
-*.idb
-*.exe
-*.dll
-*.lib
 *.obj
-*.exp
-*.ilk
-
-# IDEs
-.vscode/
-.idea/
-*.xcworkspace
-*.xcodeproj
-
-# JUCE specific / Plugin outputs
-*.vst3
-*.dll
-*.clap
-JUCELibraryCode/
-JuceLibraryCode/
-*.jucer
-
-# OS specific
-.DS_Store
-Thumbs.db
-
-# Scratch and Temp files
-scratch/
-tmp/
-temp/
+*.bin
+*.log

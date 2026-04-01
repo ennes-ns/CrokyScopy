@@ -1,8 +1,10 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "HUDWindow.h"
-#include "ScopeBuffer.h"
+#include "../Core/ScopeBuffer.h"
+
+// Forward declaration of HUDWindow
+namespace CrokyScopy { class HUDWindow; }
 
 class CrokyScopyAudioProcessor : public juce::AudioProcessor
 {
@@ -33,18 +35,17 @@ public:
     void getStateInformation(juce::MemoryBlock& destData) override;
     void setStateInformation(const void* data, int sizeInBytes) override;
 
+    // --- Data Public Access ---
+    CrokyScopy::ScopeBuffer& getScopeBuffer() { return scopeBuffer; }
     juce::AudioProcessorValueTreeState apvts;
-    
-    // The main real-time buffer for the scope visual
-    ScopeBuffer scopeBuffer;
 
     void toggleHUD(bool shouldBeOpen);
 
 private:
+    CrokyScopy::ScopeBuffer scopeBuffer;
     std::unique_ptr<CrokyScopy::HUDWindow> hudWindow;
-    
+
     juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CrokyScopyAudioProcessor)
 };
-
