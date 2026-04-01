@@ -17,6 +17,7 @@ public:
     // Mouse events for draggability in edit mode
     void mouseDown(const juce::MouseEvent& e) override;
     void mouseDrag(const juce::MouseEvent& e) override;
+    void mouseUp(const juce::MouseEvent& e) override;
 
 private:
     CrokyScopeAudioProcessor& processor;

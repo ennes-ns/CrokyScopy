@@ -75,18 +75,34 @@ void CrokyScopeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
     
     bool shouldPause = (pausedParam && pausedParam->load() > 0.5f);
     
+    double bpm = 120.0;
+    
     // Transport sync logic
-    if (transportSyncParam && transportSyncParam->load() > 0.5f) {
-        if (auto* ph = getPlayHead()) {
-            if (auto pos = ph->getPosition()) {
-                if (!pos->getIsPlaying()) {
-                    shouldPause = true;
-                }
-                
-                // If we want exact beat matching, we'd dynamically adjust samplesPerPixel here.
-                // For now, simpler RMS/peak flow
+    if (auto* ph = getPlayHead()) {
+        if (auto pos = ph->getPosition()) {
+            if (transportSyncParam && transportSyncParam->load() > 0.5f) {
+                if (!pos->getIsPlaying()) shouldPause = true;
+            }
+            if (pos->getBpm().hasValue()) {
+                bpm = *pos->getBpm();
             }
         }
+    }
+    
+    // Calculate beats configuration
+    auto* beatsParam = treeState.getRawParameterValue("beats");
+    float beatsIdx = beatsParam ? beatsParam->load() : 2.0f;
+    int beatsNum = 4;
+    if (beatsIdx < 0.5f) beatsNum = 1;
+    else if (beatsIdx < 1.5f) beatsNum = 2;
+    else if (beatsIdx < 2.5f) beatsNum = 4;
+    else if (beatsIdx < 3.5f) beatsNum = 8;
+    else beatsNum = 16;
+    
+    if (getSampleRate() > 0) {
+        double totalSamplesForDuration = (getSampleRate() * beatsNum * 60.0) / bpm;
+        samplesPerPixel = static_cast<int>(totalSamplesForDuration / SCOPE_BUFFER_SIZE);
+        if (samplesPerPixel < 1) samplesPerPixel = 1;
     }
 
     if (!shouldPause) {

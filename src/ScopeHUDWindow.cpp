@@ -22,8 +22,8 @@ ScopeHUDWindow::ScopeHUDWindow(CrokyScopeAudioProcessor& p)
     
     localData.resize(SCOPE_BUFFER_SIZE, 0.0f);
     
-    // Update at ~30 FPS to prevent Win32 spiking
-    startTimerHz(30);
+    // Update at ~60 FPS
+    startTimerHz(60);
 }
 
 ScopeHUDWindow::~ScopeHUDWindow()
@@ -48,9 +48,6 @@ void ScopeHUDWindow::timerCallback()
     // Pas muis clicks door op Windows als we niet in edit mode zijn
     setInterceptsMouseClicks(editMode, editMode);
     
-    // Read lock-free buffer securely
-    int currentWritePos = processor.writePos.load(std::memory_order_acquire);
-    
     for (int i = 0; i < SCOPE_BUFFER_SIZE; ++i) {
         localData[i] = processor.scopeData[i].load(std::memory_order_relaxed);
     }
@@ -61,6 +58,10 @@ void ScopeHUDWindow::timerCallback()
 
 void ScopeHUDWindow::paint(juce::Graphics& g)
 {
+    float w = (float)getWidth();
+    float h = (float)getHeight();
+    float halfH = h / 2.0f;
+
     auto* editParam = processor.treeState.getRawParameterValue("edit_mode");
     bool editMode = editParam && editParam->load() > 0.5f;
 
@@ -74,6 +75,10 @@ void ScopeHUDWindow::paint(juce::Graphics& g)
         g.drawRect(getLocalBounds(), 2);
         
         g.drawText("CrokyScope HUD (Drag me) - Edit Mode ON", getLocalBounds(), juce::Justification::centredTop, true);
+        
+        // Resize handle lines in bottom right
+        g.drawLine(w - 25, h - 5, w - 5, h - 25, 2.0f);
+        g.drawLine(w - 15, h - 5, w - 5, h - 15, 2.0f);
     }
     
     auto* hueParam = processor.treeState.getRawParameterValue("hue");
@@ -85,18 +90,13 @@ void ScopeHUDWindow::paint(juce::Graphics& g)
     g.setColour(juce::Colour::fromHSV(hue, 0.8f, 1.0f, 1.0f));
     
     juce::Path p;
-    float w = (float)getWidth();
-    float h = (float)getHeight();
-    float halfH = h / 2.0f;
-    
     int wPos = processor.writePos.load(std::memory_order_relaxed);
     
     p.startNewSubPath(0.0f, halfH);
     
-    // Teken de topgolf
+    // Teken de topgolf, left to right sweep
     for (int i = 0; i < SCOPE_BUFFER_SIZE; ++i) {
-        int index = (wPos + i) % SCOPE_BUFFER_SIZE;
-        float val = localData[index];
+        float val = localData[i];
         float x = (i / (float)(SCOPE_BUFFER_SIZE - 1)) * w;
         float y = halfH - (val * halfH);
         p.lineTo(x, y);
@@ -104,8 +104,7 @@ void ScopeHUDWindow::paint(juce::Graphics& g)
     
     // Teken de ondergolf terug (gespiegeld/centered)
     for (int i = SCOPE_BUFFER_SIZE - 1; i >= 0; --i) {
-        int index = (wPos + i) % SCOPE_BUFFER_SIZE;
-        float val = localData[index];
+        float val = localData[i];
         float x = (i / (float)(SCOPE_BUFFER_SIZE - 1)) * w;
         float y = halfH + (val * halfH);
         p.lineTo(x, y);
@@ -113,6 +112,11 @@ void ScopeHUDWindow::paint(juce::Graphics& g)
     
     p.closeSubPath();
     g.fillPath(p);
+    
+    // Optional: Draw the playhead / sweep cursor
+    g.setColour(juce::Colours::white.withAlpha(0.5f));
+    float headX = (wPos / (float)(SCOPE_BUFFER_SIZE - 1)) * w;
+    g.drawLine(headX, 0.0f, headX, h, 2.0f);
 }
 
 void ScopeHUDWindow::resized()
@@ -125,9 +129,12 @@ void ScopeHUDWindow::mouseDown(const juce::MouseEvent& e)
     bool editMode = editParam && editParam->load() > 0.5f;
     
     if (editMode) {
-        if (e.mods.isRightButtonDown()) {
+        // Maak het resize-gebied wat groter (40 pixels) voor gemak
+        if (e.getPosition().x > getWidth() - 40 && e.getPosition().y > getHeight() - 40) {
             startBounds = getBounds();
+            getProperties().set("isResizing", true);
         } else {
+            getProperties().set("isResizing", false);
             dragger.startDraggingComponent(this, e);
         }
     }
@@ -139,12 +146,23 @@ void ScopeHUDWindow::mouseDrag(const juce::MouseEvent& e)
     bool editMode = editParam && editParam->load() > 0.5f;
     
     if (editMode) {
-        if (e.mods.isRightButtonDown()) {
-            int newW = juce::jmax(50, startBounds.getWidth() + e.getDistanceFromDragStartX());
+        if (getProperties().contains("isResizing") && (bool)getProperties()["isResizing"]) {
+            // Respecteer de startBounds van de mousedown
+            int newW = juce::jmax(100, startBounds.getWidth() + e.getDistanceFromDragStartX());
             int newH = juce::jmax(50, startBounds.getHeight() + e.getDistanceFromDragStartY());
+            
             setBounds(startBounds.getX(), startBounds.getY(), newW, newH);
         } else {
             dragger.dragComponent(this, e, nullptr);
         }
     }
+}
+
+void ScopeHUDWindow::mouseUp(const juce::MouseEvent& e)
+{
+    getProperties().set("isResizing", false);
+    
+    // Save current size to APVTS after mouse released
+    if (auto* p_w = processor.treeState.getParameter("hud_w")) p_w->setValueNotifyingHost(p_w->convertTo0to1((float)getWidth()));
+    if (auto* p_h = processor.treeState.getParameter("hud_h")) p_h->setValueNotifyingHost(p_h->convertTo0to1((float)getHeight()));
 }
