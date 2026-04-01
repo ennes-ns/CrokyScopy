@@ -13,20 +13,15 @@ HUDWindow::HUDWindow(CrokyScopyAudioProcessor& p)
     setAlwaysOnTop(true);
     setResizable(true, true);
 
-    // Initial default size
-    int savedW = 800;
-    int savedH = 300;
-    centreWithSize(savedW, savedH);
-
     scopeComponent = std::make_unique<ScopeComponent>(processor);
-    scopeComponent->setVisible(true);
-    setContentOwned(scopeComponent.get(), true);
+    scopeComponent->setSize(800, 300);
+    setContentNonOwned(scopeComponent.get(), true);
     
     // JUCE-native transparency
     setBackgroundColour(juce::Colours::transparentBlack);
     
-    // CRITICAL: Bind to OS window manager, vital for VST3 popups
-    addToDesktop(0);
+    // Explicitly center the window on the main display
+    centreWithSize(800, 300);
 }
 
 HUDWindow::~HUDWindow()

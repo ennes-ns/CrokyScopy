@@ -7,9 +7,7 @@ namespace CrokyScopy
 ScopeComponent::ScopeComponent(CrokyScopyAudioProcessor& p)
     : processor(p)
 {
-    // High-performance painting standard
     setOpaque(false);
-    setBufferedToImage(true);
     
     // Smooth 60FPS refresh via safe JUCE timer
     startTimerHz(60); 
