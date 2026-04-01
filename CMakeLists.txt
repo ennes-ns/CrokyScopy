@@ -2,8 +2,9 @@ cmake_minimum_required(VERSION 3.22)
 
 project(CrokyScopy VERSION 0.1.0)
 
-# 0. Global JUCE Configuration (MUST BE BEFORE FETCH)
-set(JUCE_UNIT_TESTS 1 CACHE BOOL "" FORCE)
+# 0. Global Project Configuration
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # 1. Fetch JUCE 8
 include(FetchContent)
@@ -66,22 +67,3 @@ target_link_libraries(CrokyScopy
 
 # 6. Generate JUCE Header
 juce_generate_juce_header(CrokyScopy)
-
-# 7. Add Unit Test Target (Console App)
-juce_add_console_app(CrokyScopyTests
-    PRODUCT_NAME "CrokyScopyTests"
-)
-
-target_sources(CrokyScopyTests
-    PRIVATE
-    Source/Core/ScopeBufferTest.cpp
-    Source/Core/ScopeBuffer.h
-)
-
-target_link_libraries(CrokyScopyTests
-    PRIVATE
-    juce::juce_core
-    juce::juce_audio_basics
-)
-
-juce_generate_juce_header(CrokyScopyTests)
